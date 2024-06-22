@@ -16,11 +16,23 @@ export default function App() {
     setItems((items) => items.filter((item) => item.id !== id));
   };
 
+  const handleCheckItem = (id) => {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  };
+
   return (
     <div className="app">
       <Logo />
       <Form onAddItem={handleAddItem} />
-      <PackingList items={items} onDeleteItem={handleDeleteItem} />
+      <PackingList
+        items={items}
+        onDeleteItem={handleDeleteItem}
+        onCheckItem={handleCheckItem}
+      />
       <Stats />
     </div>
   );
@@ -43,7 +55,7 @@ function Form({ onAddItem }) {
       id: Date.now(),
       description: description,
       quantity: quantity,
-      packed: false,
+      packed: false
     };
 
     onAddItem(newItem);
@@ -81,7 +93,7 @@ function Form({ onAddItem }) {
   );
 }
 
-function PackingList({ items, onDeleteItem }) {
+function PackingList({ items, onDeleteItem, onCheckItem }) {
   return (
     <div className="list">
       {items.length !== 0 ? (
@@ -94,6 +106,7 @@ function PackingList({ items, onDeleteItem }) {
               id={item.id}
               key={item.id}
               onDeleteItem={onDeleteItem}
+              onCheckItem={onCheckItem}
             />
           ))}
         </ul>
@@ -106,9 +119,23 @@ function PackingList({ items, onDeleteItem }) {
   );
 }
 
-function Item({ description, quantity, packed, id, onDeleteItem }) {
+function Item({
+  description,
+  quantity,
+  packed,
+  id,
+  onDeleteItem,
+  onCheckItem
+}) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={packed}
+        onChange={() => {
+          onCheckItem(id);
+        }}
+      />
       <span style={packed ? { textDecoration: "line-through" } : {}}>
         {quantity} {description}
       </span>
