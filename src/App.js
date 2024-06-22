@@ -1,28 +1,26 @@
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: true },
-  { id: 2, description: "Socks", quantity: 12, packed: true },
-];
+// const initialItems = [
+//   { id: 1, description: "Passports", quantity: 2, packed: false },
+//   { id: 2, description: "Socks", quantity: 12, packed: false },
+// ];
 
 export default function App() {
-  const [list, setList] = useState(initialItems);
+  const [items, setItems] = useState([]);
 
-  const addItem = (desc, qty) => {
-    const newItem = {
-      id: Date.now(),
-      description: desc,
-      quantity: qty,
-      packed: false,
-    };
-    setList((initialItems) => [...initialItems, newItem]);
+  const handleAddItem = (item) => {
+    setItems((items) => [...items, item]);
+  };
+
+  const handleDeleteItem = (id) => {
+    setItems((items) => items.filter((item) => item.id !== id));
   };
 
   return (
     <div className="app">
       <Logo />
-      <Form addItem={addItem} />
-      <PackingList list={list} />
+      <Form onAddItem={handleAddItem} />
+      <PackingList items={items} onDeleteItem={handleDeleteItem} />
       <Stats />
     </div>
   );
@@ -32,7 +30,7 @@ function Logo() {
   return <h1>🏖️ FAR AWAY 💼</h1>;
 }
 
-function Form({ addItem }) {
+function Form({ onAddItem }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -41,7 +39,14 @@ function Form({ addItem }) {
 
     if (!description) return;
 
-    addItem(description, quantity);
+    const newItem = {
+      id: Date.now(),
+      description: description,
+      quantity: quantity,
+      packed: false,
+    };
+
+    onAddItem(newItem);
 
     setDescription("");
     setQuantity(1);
@@ -76,30 +81,38 @@ function Form({ addItem }) {
   );
 }
 
-function PackingList({ list }) {
+function PackingList({ items, onDeleteItem }) {
   return (
     <div className="list">
-      <ul>
-        {list.map((item) => (
-          <Item
-            description={item.description}
-            quantity={item.quantity}
-            packed={item.packed}
-            key={item.id}
-          />
-        ))}
-      </ul>
+      {items.length !== 0 ? (
+        <ul>
+          {items.map((item) => (
+            <Item
+              description={item.description}
+              quantity={item.quantity}
+              packed={item.packed}
+              id={item.id}
+              key={item.id}
+              onDeleteItem={onDeleteItem}
+            />
+          ))}
+        </ul>
+      ) : (
+        <div>
+          <h3>Packing List is Empty...</h3>
+        </div>
+      )}
     </div>
   );
 }
 
-function Item({ description, quantity, packed }) {
+function Item({ description, quantity, packed, id, onDeleteItem }) {
   return (
     <li>
       <span style={packed ? { textDecoration: "line-through" } : {}}>
         {quantity} {description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(id)}>❌</button>
     </li>
   );
 }
